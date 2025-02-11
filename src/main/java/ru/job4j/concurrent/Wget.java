@@ -25,27 +25,23 @@ public class Wget implements Runnable {
     long startAt = System.currentTimeMillis();
     String fileName = url.substring(url.lastIndexOf("/") + 1);
     File file = new File(fileName);
-    try (InputStream input = new URL(url).openStream();
-         FileOutputStream output = new FileOutputStream(file)) {
+    try (InputStream input = new URL(url).openStream(); FileOutputStream output = new FileOutputStream(file)) {
       System.out.println("Open connection: " + (System.currentTimeMillis() - startAt) + " ms");
       byte[] dataBuffer = new byte[BUFFER_SIZE];
       int bytesRead;
       int bytesCount = 0;
       long time = System.currentTimeMillis();
       while ((bytesRead = input.read(dataBuffer, 0, dataBuffer.length)) != -1) {
+        output.write(dataBuffer, 0, bytesRead);
         bytesCount += bytesRead;
-        long butchTime = System.currentTimeMillis() - time;
-        if (bytesCount < speed || butchTime >= 1) {
+        if (bytesCount >= speed) {
           continue;
         }
-        try {
-          long toSleep = bytesCount / speed;
-          System.out.printf("Sleeping %d ms%n", toSleep);
-          Thread.sleep(toSleep);
+        long interval = System.currentTimeMillis() - time;
+        if (interval < 1000) {
+          sleep(interval);
           bytesCount = 0;
           time = System.currentTimeMillis();
-        } catch (InterruptedException e) {
-          Thread.currentThread().interrupt();
         }
       }
       System.out.println(Files.size(file.toPath()) + " bytes");
@@ -57,14 +53,14 @@ public class Wget implements Runnable {
   public static void main(String[] args) throws InterruptedException {
     int argsLength = args.length;
     if (argsLength != 2) {
-      throw new RuntimeException(String.format("Required exactly 2 arguments, but was provided %d. Usage: [URL] [SPEED]%n", argsLength));
+
+      throw new IllegalArgumentException(String.format("Required exactly 2 arguments, but was provided %d. Usage: [URL] [SPEED]%n", argsLength));
     }
     String url = args[0];
     if (!isValidURL(url)) {
-      throw new RuntimeException(String.format("Invalid url: %s%n", url));
+      throw new IllegalArgumentException(String.format("Invalid url: %s%n", url));
     }
 
-    String speedStr = args[1];
     int speed = Integer.parseInt(args[1]);
 
     Thread wget = new Thread(new Wget(url, speed));
@@ -81,6 +77,16 @@ public class Wget implements Runnable {
       return true;
     } catch (MalformedURLException | URISyntaxException e) {
       return false;
+    }
+  }
+
+  private static void sleep(long interval) {
+    try {
+      long toSleep = 1000 - interval;
+      System.out.printf("Sleeping %d ms%n", toSleep);
+      Thread.sleep(toSleep);
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
     }
   }
 }
