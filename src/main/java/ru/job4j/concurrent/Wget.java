@@ -34,15 +34,12 @@ public class Wget implements Runnable {
       while ((bytesRead = input.read(dataBuffer, 0, dataBuffer.length)) != -1) {
         output.write(dataBuffer, 0, bytesRead);
         bytesCount += bytesRead;
-        if (bytesCount >= speed) {
-          continue;
-        }
         long interval = System.currentTimeMillis() - time;
         if (interval < 1000) {
           sleep(interval);
-          bytesCount = 0;
-          time = System.currentTimeMillis();
         }
+        bytesCount = 0;
+        time = System.currentTimeMillis();
       }
       System.out.println(Files.size(file.toPath()) + " bytes");
     } catch (IOException e) {
