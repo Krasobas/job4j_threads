@@ -37,7 +37,7 @@ public class Wget implements Runnable {
         if (bytesCount >= speed) {
           long interval = System.currentTimeMillis() - time;
           if (interval < 1000) {
-            sleep(interval);
+            pause(interval);
           }
           bytesCount = 0;
           time = System.currentTimeMillis();
@@ -80,7 +80,7 @@ public class Wget implements Runnable {
     }
   }
 
-  private static void sleep(long interval) {
+  private static void pause(long interval) {
     try {
       long toSleep = 1000 - interval;
       System.out.printf("Sleeping %d ms%n", toSleep);
