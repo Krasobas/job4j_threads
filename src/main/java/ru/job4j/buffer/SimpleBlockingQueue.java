@@ -10,10 +10,19 @@ import java.util.Queue;
 public class SimpleBlockingQueue<T> {
 
   @GuardedBy("this")
-  private final Queue<T> queue = new LinkedList<>();
+  private final Queue<T> queue;
+  private final int size;
 
-  public void offer(T value) {
+  public SimpleBlockingQueue(int size) {
+    this.size = size;
+    this.queue = new LinkedList<>();
+  }
+
+  public void offer(T value) throws InterruptedException {
     synchronized (this) {
+      while (queue.size() >= size) {
+        wait();
+      }
       queue.offer(value);
       notifyAll();
     }
@@ -24,7 +33,9 @@ public class SimpleBlockingQueue<T> {
       while (queue.isEmpty()) {
         wait();
       }
-      return queue.poll();
+      T next = queue.poll();
+      notifyAll();
+      return next;
     }
   }
 }

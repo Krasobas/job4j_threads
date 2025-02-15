@@ -12,10 +12,17 @@ class SimpleBlockingQueueTest {
 
   @Test
   void whenOneProducerAndOneConsumer() throws InterruptedException {
-    SimpleBlockingQueue<String> queue = new SimpleBlockingQueue<>();
+    SimpleBlockingQueue<String> queue = new SimpleBlockingQueue<>(10);
     List<String> messages = List.of("hello", "world", "bonjour", "le monde");
 
-    Thread producer = new Thread(() -> messages.forEach(queue::offer));
+    Thread producer = new Thread(() -> messages.forEach(s -> {
+      try {
+        queue.offer(s);
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+        fail();
+      }
+    }));
     Thread consumer = new Thread(() -> messages.forEach(s -> {
       try {
         assertThat(s).isEqualTo(queue.poll());
