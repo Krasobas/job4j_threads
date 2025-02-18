@@ -5,7 +5,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class EmailNotification {
-  ExecutorService pool = Executors.newCachedThreadPool();
+  private final ExecutorService pool = Executors.newCachedThreadPool();
 
   public void send(String subject, String body, String email) {
 
@@ -24,5 +24,12 @@ public class EmailNotification {
 
   public void close() {
     pool.shutdown();
+    while (!pool.isTerminated()) {
+      try {
+        Thread.sleep(100);
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+      }
+    }
   }
 }
