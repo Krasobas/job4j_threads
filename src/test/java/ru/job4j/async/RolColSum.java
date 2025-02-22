@@ -11,6 +11,7 @@ public class RolColSum {
   @NoArgsConstructor
   @AllArgsConstructor
   @EqualsAndHashCode
+  @ToString
   public static class Sums {
     private int rowSum;
     private int colSum;
@@ -25,7 +26,7 @@ public class RolColSum {
       int colSum = 0;
       for (int j = 0; j < size; j++) {
         rowSum += matrix[i][j];
-        colSum += matrix[i][i];
+        colSum += matrix[j][i];
       }
       sums[i] = new Sums(rowSum, colSum);
     }
@@ -39,7 +40,14 @@ public class RolColSum {
     for (int i = 0; i < size; i++) {
       futures[i] = getTask(matrix, i, sums);
     }
-    CompletableFuture.allOf(futures);
+    try {
+      CompletableFuture.allOf(futures)
+          .get();
+    } catch (Exception e) {
+      if (e instanceof InterruptedException) {
+        Thread.currentThread().interrupt();
+      }
+    }
     return sums;
   }
 
@@ -49,7 +57,7 @@ public class RolColSum {
       int colSum = 0;
       for (int j = 0; j < matrix.length; j++) {
         rowSum += matrix[i][j];
-        colSum += matrix[i][i];
+        colSum += matrix[j][i];
       }
       sums[i] = new Sums(rowSum, colSum);
     });
