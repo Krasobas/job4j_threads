@@ -1,6 +1,5 @@
 package ru.job4j.pool;
 
-import java.util.Random;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveTask;
 import java.util.concurrent.ThreadLocalRandom;
