@@ -21,26 +21,27 @@ public class ParallelIndexSearch<T> extends RecursiveTask<Integer> {
 
   @Override
   protected Integer compute() {
-    int index = -1;
     if ((end - start) <= 10) {
-      for (int i = start; i < end; i++) {
-        if (target.equals(array[i])) {
-          return i;
-        }
-      }
-    } else {
-      int middle = start + (end - start) / 2;
-      ParallelIndexSearch<T> left = new ParallelIndexSearch<>(array, target, start, middle);
-      ParallelIndexSearch<T> right = new ParallelIndexSearch<>(array, target, middle, end);
-      left.fork();
-
-      int leftResult = left.join();
-      int rightResult = right.compute();
-
-      return leftResult != -1 ? leftResult : rightResult;
-
+      return linerSearch();
     }
-    return index;
+    int middle = start + (end - start) / 2;
+    ParallelIndexSearch<T> left = new ParallelIndexSearch<>(array, target, start, middle);
+    ParallelIndexSearch<T> right = new ParallelIndexSearch<>(array, target, middle, end);
+    left.fork();
+
+    int leftResult = left.join();
+    int rightResult = right.compute();
+
+    return leftResult != -1 ? leftResult : rightResult;
+  }
+
+  private int linerSearch() {
+    for (int i = start; i < end; i++) {
+      if (target.equals(array[i])) {
+        return i;
+      }
+    }
+    return -1;
   }
 
   public static <T> int indexOf(T[] array, T value) {
