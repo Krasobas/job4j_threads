@@ -32,7 +32,6 @@ public class PipedUsage {
       }
     });
 
-//    input.connect(output);
     output.connect(input);
     firstThread.start();
     secondThread.start();
